@@ -1,0 +1,23 @@
+{
+  "name": "vitex-mysql",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skipify/vitex-mysql"
+  },
+  "dependencies":{
+    "mysql" : "~2.5.3",
+    "lodash":"~2.4.1"
+  },
+  "keywords": [
+    "mysql",
+    "node"
+  ],
+  "author": "skipify@qq.com",
+  "license": "MIT"
+}
