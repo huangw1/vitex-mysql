@@ -19,7 +19,7 @@ var Vitex = function(dc,obj){
 		table:'',
 		where:{},
 		whereStr:'',
-		like :'',
+		like :{},
 		fields:{},
 		limit:0,
 		skip:0,
@@ -62,7 +62,7 @@ Vitex.prototype.resetConfig = function(){
 		table : "",
 		where : {},
 		whereStr:'',
-		like:'',
+		like:{},
 		fields : {},
 		limit : 0,
 		skip : 0,
@@ -82,7 +82,7 @@ Vitex.prototype.resetConfig = function(){
 	设置查询条件
 	k string && v undefined 可以指定一个特别的字符串条件
 */
-Vitex.prototype.where = function(k,v,and){
+Vitex.prototype.where = function(k,v){
 
 	if(typeof k === 'string' && v === undefined){
 		this._config.whereStr = k;
@@ -104,8 +104,23 @@ Vitex.prototype.where = function(k,v,and){
 	@param string
 	@param string/regexp
 */
-Vitex.prototype.like = function(key,val){
-
+Vitex.prototype.like = function(k,v){
+	if(_.isObject(k)){
+		for(var i in k){
+			var key = connection.escapeId(i);
+			if(k[i].indexOf('%') ==-1){
+				k[i] = '%' + k[i] + '%';
+			}
+			this._config.like[key] = connection.escape(k[i]);
+		}
+	}else{
+		k = connection.escapeId(k);
+		if(v.indexOf('%') ==-1){
+			v = '%' + v + '%';
+		}
+		this._config.like[k] = connection.escape(v);
+	}
+	return this;
 }
 /*
 	选择集合
@@ -188,23 +203,26 @@ Vitex.prototype.buildSql = function(type){
 		case "select":
 			_sql = "SELECT ";
 			_sql += config.fields.length > 0 ? config.fields.join(',') : "*";
-			_sql += " ";
+			_sql += " FROM " + table;
 		break;
 		case "count":
-			_sql = "SELECT COUNT(*) AS num ";
+			_sql = "SELECT COUNT(*) AS num FROM " + table;
 			//处理上次保存的内容
 			//此处非深度复制
 			config.where    = _.isEmpty(config.where) ? this.countConfig.where : config.where;
 			config.whereStr = config.whereStr || this.countConfig.whereStr;
+			config.like     = _.isEmpty(config.like) ? this.countConfig.like : config.like;
 			config.sort     = [];
 			config.limit    = 0;
 		break;
 		case "remove":
-			_sql = "DELETE ";
+			_sql = "DELETE FROM " + table;
+		break;
+		case "update":
+			_sql = "UPDATE " + table + " SET ? ";
 		break;
 	}
 
-	_sql += " FROM " + table;
 
 	//where
 	if(!_.isEmpty(config.where)){
@@ -221,6 +239,17 @@ Vitex.prototype.buildSql = function(type){
 			_sql += " WHERE 1 ";
 		}
 		_sql += " AND " + config.whereStr;
+		haswhere = true;
+	}
+	if(!_.isEmpty(config.like)){
+		if(!haswhere){
+			_sql += " WHERE 1 ";
+		}
+		var _w = [];
+		for(var k in config.like){
+			_w.push(k+" like "+config.like[k]+"");
+		}
+		_sql += " AND " + _w.join(" AND ");
 	}
 
 	//order
@@ -250,7 +279,7 @@ Vitex.prototype.find = function(callback){
 	if(!sql){
 		throw new Error('Sql is Empty');
 	}
-	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr};
+	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like};
 	connection.query(sql,function(err,rows,fields){
 		callback && callback.apply(null,arguments);
 	});
@@ -264,7 +293,7 @@ Vitex.prototype.findOne = function(callback)
 	if(!sql){
 		throw new Error('Sql is Empty');
 	}
-	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr};
+	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like};
 	connection.query(sql,function(err,rows,fields){
 		var row = rows.shift();
 		callback && callback.call(null,err,row,fields);
@@ -372,7 +401,7 @@ Vitex.prototype.update = function(doc,callback){
 	if(!table){
 		throw new Error('Table Name is Empty');
 	}
-	var _sql = "UPDATE " + table + " SET ?";
+	var _sql = this.buildSql('update');
 		_sql = mysql.format(_sql,[doc]);
 		sql  = _sql;
 	connection.query(_sql,function(err,result){
@@ -382,28 +411,3 @@ Vitex.prototype.update = function(doc,callback){
 
 
 module.exports = Vitex;
-/*
-var db = {
-	host: 'localhost',
-	user: 'root',
-	password :'',
-	database:"test"
-};
-
-var v = Vitex('test',db);
-//v.save([{name:"tets node5"},{name:"test node6'"}]);
-//v.save([['name'],['xxx'],['setme']],function(err,re){
-//	console.log(re);
-//});
-v.where('name','setme').limit(5).find(function(err,result){
-	console.log(result);
-});
-v.count(function(err,num){
-	console.log(num);
-});
-v.find(function(err,result){
-	console.log(result);
-});
-//console.log(v.getSql());
-
-*/
