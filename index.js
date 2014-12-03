@@ -7,11 +7,12 @@ var connection,
 var db = {
 	host: 'localhost',
 	user: 'root',
-	password :''
+	password :'',
+	database:"test"
 };
 
 var Vitex = function(dc,obj){
-	if(!(this instanceof Vitex)) return new Vitex();
+	if(!(this instanceof Vitex)) return new Vitex(dc,obj);
 	this._dc = dc;
 	if(_.isEmpty(obj))
 	{
@@ -24,7 +25,7 @@ var Vitex = function(dc,obj){
 		fields:{},
 		limit:0,
 		skip:0,
-		sort:{}
+		sort:[]
 	};
 	this.connect(obj);
 }
@@ -34,7 +35,7 @@ var Vitex = function(dc,obj){
 Vitex.prototype.connect = function(setting){
 	connection = mysql.createConnection(setting);
 	connection.connect();
-	return this;
+	return connection;
 }
 
 /*
@@ -64,7 +65,7 @@ Vitex.prototype.resetConfig = function(){
 		fields : {},
 		limit : 0,
 		skip : 0,
-		sort : {}
+		sort : []
 	};
 	for(var i in def)
 	{
@@ -82,9 +83,13 @@ Vitex.prototype.resetConfig = function(){
 Vitex.prototype.where = function(k,v){
 
 	if(_.isObject(k)){
-		this._config.where = _.extend(this._config.where,k);
+		for(var i in k){
+			var key = connection.escapeId(i);
+			this._config.where[key] = connection.escape(k[i]);
+		}
 	}else{
-		this._config.where[k] = v;
+		k = connection.escapeId(k);
+		this._config.where[k] = connection.escape(v);
 	}
 	return this;
 }
@@ -133,6 +138,10 @@ Vitex.prototype.limit = function(limit,skip){
 /*
 	排序
 	obj 排序字段
+	sort("id","desc");
+	sort(["id desc",[name asc]])
+	sort(["id desc,name asc"]);
+
 */
 Vitex.prototype.sort = function(obj,v){
 	v = v || 'DESC';
@@ -141,6 +150,8 @@ Vitex.prototype.sort = function(obj,v){
 	{
 		this._config.sort = _.union(this._config.sort,obj);
 	}else{
+		v   = v.toUpperCase();
+		obj = connection.escapeId(obj);
 		this._config.sort.push(obj + " " + v);
 	}
 	return this;
@@ -174,12 +185,12 @@ Vitex.prototype.buildSql = function(){
 			_sql += " WHERE ";
 			var _w = [];
 			for(var k in config.where){
-				_w.push("`"+k+"`='"+config.where[k]+"'");
+				_w.push(k+"="+config.where[k]+"");
 			}
 			_sql += _w.join(" AND ");
 		}
 		//order
-		if(config.sort)
+		if(config.sort.length > 0)
 		{
 			_sql += " ORDER BY " + config.sort.join(',');
 		}
@@ -187,10 +198,14 @@ Vitex.prototype.buildSql = function(){
 		if(config.limit){
 			_sql += " LIMIT "+config.skip + "," + config.limit;
 		}
-		
+		sql = _sql;
 	return _sql;
 }
 
+//获取组成的查询SQL
+Vitex.prototype.getSql = function(){
+	return sql;
+}
 
 Vitex.prototype.find = function(callback){
 	var sql = this.buildSql();
@@ -204,3 +219,74 @@ Vitex.prototype.find = function(callback){
 	this.resetConfig();
 }
 
+/*
+	doc string/object
+	{name:"this is a name"}
+	
+	[{name:'name1'},{name:"name2"}]
+
+	[['name'],['name1'],['name2']] first element is keys
+ */
+
+Vitex.prototype.save = function(doc,callback){
+	doc = doc || this._config.set;
+	if(_.isEmpty(doc)){
+		throw new Error('Insert Data Is Empty');
+	}
+	var table = this._config.table || this._dc;
+	if(!table){
+		throw new Error('Table Name is Empty');
+	}
+	if(_.isArray(doc))
+	{
+		if(doc.length == 0){
+			throw new Error('Doc is Empty');
+		}
+		//two cases
+		if(_.isArray(doc[0])){
+			//one element is keys
+			var keys = doc.shift();
+			if(doc.length == 0){
+				//没有要插入的内容
+				throw new Error('Doc is Empty,Only has Keys');
+			}
+		}else{
+			// keys are the object's keys
+			var keys = [],vals = [];
+			for(var i in doc){
+				keys = _.keys(doc[i]);
+				vals.push(_.values(doc[i]));
+			}
+			//过滤键值和内容
+			doc = vals;
+		}
+		//filter keys
+		for(var i in keys){
+			keys[i] = connection.escapeId(keys);
+		}
+		keys = keys.join(',');
+
+		var sql = "INSERT INTO Test ("+keys+") VALUES ?";
+		connection.query(sql, [doc], function(err,result) {
+		    callback && callback.apply(null,arguments);
+		});
+	}else{
+		//单条信息插入
+		connection.query("INSERT INTO ?? SET ?",[table,doc],function(err,result){
+			callback && callback.apply(null,arguments);
+		})
+	}
+
+}
+
+
+//module.exports = Vitex;
+var v = Vitex('test',db);
+//v.save([{name:"tets node5"},{name:"test node6'"}]);
+//v.save([['name'],['xxx'],['setme']]);
+
+v.where('name','Ninja').sort('id','asc').limit(1).find(function(e,r){
+	console.log(r);
+});
+
+console.log(v.getSql());
