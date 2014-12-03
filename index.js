@@ -18,6 +18,8 @@ var Vitex = function(dc,obj){
 	this._config = {
 		table:'',
 		where:{},
+		whereStr:'',
+		like :'',
 		fields:{},
 		limit:0,
 		skip:0,
@@ -60,6 +62,7 @@ Vitex.prototype.resetConfig = function(){
 		table : "",
 		where : {},
 		whereStr:'',
+		like:'',
 		fields : {},
 		limit : 0,
 		skip : 0,
