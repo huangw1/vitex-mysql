@@ -194,7 +194,7 @@ Vitex.prototype.set = function(k,v){
 Vitex.prototype.buildSql = function(type){
 	var _sql   = 'SELECT ',
 		type   = type || 'select',
-		config = this._config,
+		config = this._config;
 		if(type === 'count'){
 			table  = config.table ? config.table : this.countConfig.table;
 		}else{
