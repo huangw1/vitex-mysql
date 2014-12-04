@@ -195,7 +195,11 @@ Vitex.prototype.buildSql = function(type){
 	var _sql   = 'SELECT ',
 		type   = type || 'select',
 		config = this._config,
-		table  = config.table ? config.table : this._dc;
+		if(type === 'count'){
+			table  = config.table ? config.table : this.countConfig.table;
+		}else{
+			table  = config.table ? config.table : this._dc;
+		}
 	if(!table){
 		throw new Error('Table is Empty');
 	}
@@ -415,8 +419,10 @@ Vitex.prototype.update = function(doc,callback){
 Vitex.prototype.page = function(page,per,callback){
 	page = page || 1;
 	per  = per  || 10;
-	var that = this;
-	this.find(function(err,rows){
+	var that = this,
+		start = (page - 1) * per,
+		start = start >0 ? start : 0;
+	this.limit(per,start).find(function(err,rows){
 		if(err){
 			callback && callback.apply(null,arguments);
 			return ;
