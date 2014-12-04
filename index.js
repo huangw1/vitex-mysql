@@ -417,6 +417,15 @@ Vitex.prototype.update = function(doc,callback){
 	根据页数获取列表
  */
 Vitex.prototype.page = function(page,per,callback){
+	if(typeof page === 'function'){
+		callback = page;
+		page = 1;
+		per  = 10;
+	}
+	if(typeof per === 'function'){
+		callback = per;
+		per      = 10;
+	}
 	page = page || 1;
 	per  = per  || 10;
 	var that = this,
