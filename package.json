@@ -1,7 +1,7 @@
 {
   "name": "vitex-mysql",
   "version": "0.0.1",
-  "description": "",
+  "description": "一个对node-mysql的简单封装，使之常用功能为快捷",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
