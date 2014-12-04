@@ -409,5 +409,23 @@ Vitex.prototype.update = function(doc,callback){
 	});
 }
 
+/*
+	根据页数获取列表
+ */
+Vitex.prototype.page = function(page,per,callback){
+	page = page || 1;
+	per  = per  || 10;
+	var that = this;
+	this.find(function(err,rows){
+		if(err){
+			callback && callback.apply(null,arguments);
+			return ;
+		}
+		that.count(function(e,num){
+			callback && callback.call(null,e,{total:num,data:rows});
+		});
+	});
+}
+
 
 module.exports = Vitex;
