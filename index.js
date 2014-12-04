@@ -279,7 +279,7 @@ Vitex.prototype.find = function(callback){
 	if(!sql){
 		throw new Error('Sql is Empty');
 	}
-	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like};
+	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like,table:this._config.table};
 	connection.query(sql,function(err,rows,fields){
 		callback && callback.apply(null,arguments);
 	});
@@ -293,7 +293,7 @@ Vitex.prototype.findOne = function(callback)
 	if(!sql){
 		throw new Error('Sql is Empty');
 	}
-	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like};
+	this.countConfig = {where:this._config.where,whereStr:this._config.whereStr,like:this._config.like,table:this._config.table};
 	connection.query(sql,function(err,rows,fields){
 		var row = rows.shift();
 		callback && callback.call(null,err,row,fields);
