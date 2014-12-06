@@ -34,6 +34,7 @@ var Vitex = function(dc,obj){
 Vitex.prototype.connect = function(setting){
 	connection = mysql.createConnection(setting);
 	connection.connect();
+	this.connection = connection;
 	return connection;
 }
 
@@ -442,5 +443,8 @@ Vitex.prototype.page = function(page,per,callback){
 	});
 }
 
+Vitex.prototype.close = function(){
+	connection.end();
+}
 
 module.exports = Vitex;
