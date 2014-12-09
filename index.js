@@ -443,6 +443,13 @@ Vitex.prototype.page = function(page,per,callback){
 	});
 }
 
+Vitex.prototype.findById(id,callback){
+	this.where('id',id).limit(1).find(callback)
+}
+Vitex.prototype.removeById(id,callback){
+	this.where('id',id).limit(1).remive(callback);
+}
+
 Vitex.prototype.close = function(){
 	connection.end();
 }
