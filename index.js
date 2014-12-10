@@ -442,10 +442,11 @@ Vitex.prototype.page = function(page,per,callback){
 		});
 	});
 }
-
+//根据ID查询
 Vitex.prototype.findById(id,callback){
 	this.where('id',id).limit(1).find(callback)
 }
+//根据ID删除信息
 Vitex.prototype.removeById(id,callback){
 	this.where('id',id).limit(1).remive(callback);
 }
