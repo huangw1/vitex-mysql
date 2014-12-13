@@ -413,7 +413,17 @@ Vitex.prototype.update = function(doc,callback){
 		callback && callback.call(null,err,result.effectedRows);
 	});
 }
-
+/*
+	步增
+*/
+Vitex.prototype.step = function(field,step,callback){
+	if(typeof step === 'function'){
+		callback = step;
+		step     = null;
+	}
+	step = step || 1;
+	
+}
 /*
 	根据页数获取列表
  */
