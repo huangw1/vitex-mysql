@@ -23,7 +23,8 @@ var Vitex = function(dc,obj){
 		fields:{},
 		limit:0,
 		skip:0,
-		sort:[]
+		sort:[],
+		set:{}
 	};
 	this.connect(obj);
 	this._dc = dc ? connection.escapeId(dc) : '';
@@ -67,7 +68,8 @@ Vitex.prototype.resetConfig = function(){
 		fields : {},
 		limit : 0,
 		skip : 0,
-		sort : []
+		sort : [],
+		set : {}
 	};
 	for(var i in def)
 	{
@@ -370,7 +372,8 @@ Vitex.prototype.save = function(doc,callback){
 			_sql = mysql.format(_sql,[doc]);
 			sql  = _sql;
 		connection.query(_sql, function(err,result) {
-		    callback && callback.call(null,err,result.insertId);
+			var _id = result ? result.insertId : null;
+			callback && callback.call(null,err,_id);
 		});
 	}else{
 		//单条信息插入
@@ -378,7 +381,8 @@ Vitex.prototype.save = function(doc,callback){
 			_sql = mysql.format(_sql,[table,doc]);
 			sql  = _sql;//导出sql语句
 		connection.query("INSERT INTO ?? SET ?",[table,doc],function(err,result){
-			callback && callback.call(null,err,result.insertId);
+			var _id = result ? result.insertId : null;
+			callback && callback.call(null,err,_id);
 		})
 	}
 
@@ -389,7 +393,8 @@ Vitex.prototype.save = function(doc,callback){
 Vitex.prototype.remove = function(callback){
 	var _sql = this.buildSql('remove');
 	connection.query(_sql,function(err,result,fields){
-		callback && callback.apply(null,err,result.effectedRows);
+		var rows = result ? result.effectedRows : 0;
+		callback && callback.call(null,err,rows);
 	})
 }
 
@@ -398,6 +403,10 @@ Vitex.prototype.remove = function(callback){
 	{name:'xxx'}
  */
 Vitex.prototype.update = function(doc,callback){
+	if(typeof doc == 'function'){
+		callback = doc;
+		doc      = null;
+	}
 	doc = doc || this._config.set;
 	if(_.isEmpty(doc)){
 		throw new Error('Update Data Is Empty');
@@ -409,8 +418,10 @@ Vitex.prototype.update = function(doc,callback){
 	var _sql = this.buildSql('update');
 		_sql = mysql.format(_sql,[doc]);
 		sql  = _sql;
+		console.log(sql);
 	connection.query(_sql,function(err,result){
-		callback && callback.call(null,err,result.effectedRows);
+		var rows = result ? result.effectedRows : 0;
+		callback && callback.call(null,err,rows);
 	});
 }
 /*
@@ -422,7 +433,6 @@ Vitex.prototype.step = function(field,step,callback){
 		step     = null;
 	}
 	step = step || 1;
-	
 }
 /*
 	根据页数获取列表
@@ -453,11 +463,11 @@ Vitex.prototype.page = function(page,per,callback){
 	});
 }
 //根据ID查询
-Vitex.prototype.findById(id,callback){
+Vitex.prototype.findById = function(id,callback){
 	this.where('id',id).limit(1).find(callback)
 }
 //根据ID删除信息
-Vitex.prototype.removeById(id,callback){
+Vitex.prototype.removeById = function(id,callback){
 	this.where('id',id).limit(1).remive(callback);
 }
 
