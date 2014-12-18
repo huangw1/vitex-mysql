@@ -50,6 +50,7 @@ vitex-mysql
 	设置查询的条件  
 	model.where("_id",id)  
 	model.where({_id:id})
+	model.where("_id!=",id) //>= > <= < != 都可以写在 id中
 ### like
 	@param key string 字段
 	@param val string 如果没有 %则会自动添加  %val%

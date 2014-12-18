@@ -236,7 +236,22 @@ Vitex.prototype.buildSql = function(type){
 		_sql += " WHERE ";
 		var _w = [];
 		for(var k in config.where){
-			_w.push(k+"="+config.where[k]+"");
+			var op = ' = ',val = config.where[k];
+			if(/[><=!]+/.test(k)){
+				//特殊操作符的查询
+				var _k = '',_len = k.length,i,_op='';
+				for(i=0;i<_len;i++){
+					var _char = k.substr(i,1);
+					if(/[><=!]+/.test(_char)){
+						_op += _char;
+					}else{
+						_k += _char;
+					}
+				}
+				op = _op;
+				k  = _k;
+			}//end 
+			_w.push(k + op + val + "");
 		}
 		_sql += _w.join(" AND ");
 		var haswhere = true;
@@ -474,5 +489,5 @@ Vitex.prototype.removeById = function(id,callback){
 Vitex.prototype.close = function(){
 	connection.end();
 }
-
+Vitex.mysql = mysql;
 module.exports = Vitex;

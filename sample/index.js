@@ -17,6 +17,9 @@ v.like('name',"node5").limit(5).find(function(err,result){
 v.count(function(err,num){
 	console.log(num);
 });
+// >= > <= < != 
+v.where("name!=","setmexxx");
+
 v.find(function(err,result){
 	console.log(result);
 });
