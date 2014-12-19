@@ -51,6 +51,7 @@ vitex-mysql
 	model.where("_id",id)  
 	model.where({_id:id})
 	model.where("_id!=",id) //>= > <= < != 都可以写在 id中
+	此功能主要为了简化 不等于大于等于这样的复杂操作
 ### like
 	@param key string 字段
 	@param val string 如果没有 %则会自动添加  %val%
