@@ -142,6 +142,9 @@ vitex-mysql
 ### close
 	关闭连接
 	model.close();
+### exec
+	执行sql
+	model.exec("select * from test",function(err,result){});
 # 原生接口
 	
 	model.connection ;

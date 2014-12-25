@@ -24,7 +24,8 @@ var Vitex = function(dc,obj){
 		limit:0,
 		skip:0,
 		sort:[],
-		set:{}
+		set:{},
+		join:''
 	};
 	this.connect(obj);
 	this._dc = dc ? connection.escapeId(dc) : '';
@@ -157,6 +158,14 @@ Vitex.prototype.limit = function(limit,skip){
 	this._config.skip = (skip === undefined ? 0 : skip);
 	this._config.limit = (limit == undefined ? 0 : limit);
 	return this; 
+}
+/*
+	join
+*/
+Vitex.prototype.join = function(table,cond){
+
+
+	return this;
 }
 
 /*
@@ -475,6 +484,14 @@ Vitex.prototype.page = function(page,per,callback){
 		that.count(function(e,num){
 			callback && callback.call(null,e,{total:num,data:rows});
 		});
+	});
+}
+/*
+	执行SQL
+*/
+Vitex.prototype.exec = function(sql,callback){
+	connection.query(sql,function(err,result){
+		callback && callback.apply(arguments);
 	});
 }
 //根据ID查询
