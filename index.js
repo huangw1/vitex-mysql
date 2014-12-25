@@ -25,10 +25,10 @@ var Vitex = function(dc,obj){
 		skip:0,
 		sort:[],
 		set:{},
-		join:''
+		join:[]
 	};
 	this.connect(obj);
-	this._dc = dc ? connection.escapeId(dc) : '';
+	this._dc = escapeTable(dc);
 }
 
 //创建连接
@@ -130,7 +130,8 @@ Vitex.prototype.like = function(k,v){
 	选择集合
 */
 Vitex.prototype.from = function(table){
-	this._config.table = connection.escapeId(table);
+	table = escapeTable(table);
+	this._config.table = table;
 	return this;
 }
 /*
@@ -161,10 +162,12 @@ Vitex.prototype.limit = function(limit,skip){
 }
 /*
 	join
+	@param table string
+	@param cond string
 */
 Vitex.prototype.join = function(table,cond){
-
-
+	table = escapeTable(table);
+	this._config.join.push({table:table,cond:cond});
 	return this;
 }
 
@@ -220,6 +223,14 @@ Vitex.prototype.buildSql = function(type){
 			_sql = "SELECT ";
 			_sql += config.fields.length > 0 ? config.fields.join(',') : "*";
 			_sql += " FROM " + table;
+			//join
+			var join = this._config.join;
+			if(join){
+				for(var i in join){
+					var _join = join[i];
+					_sql += (" join " + _join.table + " on " + _join.cond + " ");
+				}
+			}
 		break;
 		case "count":
 			_sql = "SELECT COUNT(*) AS num FROM " + table;
@@ -507,4 +518,24 @@ Vitex.prototype.close = function(){
 	connection.end();
 }
 Vitex.mysql = mysql;
+
+
+function escapeTable(table){
+	if(table){
+		table     = table.replace(/ +/,' ');
+		var ts    = table.split(' ');
+		if(ts.length == 2){
+			table = ts.shift();
+			alias = " " + ts.pop();
+		}else{
+			table = ts.shift();
+			alias = "";
+		}
+		table  = connection.escapeId(table);
+		table  = table + alias;
+	}else{
+		table = '';
+	}
+	return table;
+}
 module.exports = Vitex;

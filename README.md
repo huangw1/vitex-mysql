@@ -82,7 +82,10 @@ vitex-mysql
 	eg:    
 	vitex.set('username',"skipify")  
 	vitex.set({username:"skipify","password":"123456"});
-
+### join
+	@param table 表名
+	@param cond 条件
+	vitex.join("test t","t.nid = b.id");
 ### find
 	@param function 回调函数
 	查询信息

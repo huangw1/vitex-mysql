@@ -6,7 +6,8 @@ var db = {
 	database:"test"
 };
 
-var v = Vitex('test',db);
+var v = Vitex('test x',db);
+
 v.save([{name:"tets node5"},{name:"test node6"}]);
 v.save([['name'],['xxx'],['setme']],function(err,re){
 	console.log(re);
@@ -19,7 +20,11 @@ v.count(function(err,num){
 });
 // >= > <= < != 
 v.where("name!=","setmexxx");
-
+/*
+//join test
+v.select("n.*,x.name")
+v.join("name n","x.nid = n.id");
+*/
 v.find(function(err,result){
 	console.log(result);
 });
