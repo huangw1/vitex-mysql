@@ -139,6 +139,7 @@ Vitex.prototype.from = function(table){
 	field string/array
 				 _id
 				 [name,email]
+				 
 */
 Vitex.prototype.select = function(field){
 	var _fields = [];
