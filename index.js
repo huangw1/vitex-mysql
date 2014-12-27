@@ -250,50 +250,8 @@ Vitex.prototype.buildSql = function(type){
 			_sql = "UPDATE " + table + " SET ? ";
 		break;
 	}
-
-
-	//where
-	if(!_.isEmpty(config.where)){
-		_sql += " WHERE ";
-		var _w = [];
-		for(var k in config.where){
-			var op = ' = ',val = config.where[k];
-			if(/[><=!]+/.test(k)){
-				//特殊操作符的查询
-				var _k = '',_len = k.length,i,_op='';
-				for(i=0;i<_len;i++){
-					var _char = k.substr(i,1);
-					if(/[><=!]+/.test(_char)){
-						_op += _char;
-					}else{
-						_k += _char;
-					}
-				}
-				op = _op;
-				k  = _k;
-			}//end 
-			_w.push(k + op + val + "");
-		}
-		_sql += _w.join(" AND ");
-		var haswhere = true;
-	}
-	if(config.whereStr){
-		if(!haswhere){
-			_sql += " WHERE 1 ";
-		}
-		_sql += " AND " + config.whereStr;
-		haswhere = true;
-	}
-	if(!_.isEmpty(config.like)){
-		if(!haswhere){
-			_sql += " WHERE 1 ";
-		}
-		var _w = [];
-		for(var k in config.like){
-			_w.push(k+" like "+config.like[k]+"");
-		}
-		_sql += " AND " + _w.join(" AND ");
-	}
+	//where条件
+	_sql += _where(config);
 
 	//order
 	if(config.sort.length > 0)
@@ -311,6 +269,8 @@ Vitex.prototype.buildSql = function(type){
 	sql = _sql;
 	return _sql;
 }
+
+
 
 //获取组成的查询SQL
 Vitex.prototype.getSql = function(){
@@ -469,6 +429,15 @@ Vitex.prototype.step = function(field,step,callback){
 		step     = null;
 	}
 	step = step || 1;
+	field = connection.escapeId(field);
+	var config = this._config,
+		table  = config.table ? config.table : this._dc;
+	var _sql = "update " + table + " set " + field + " = " +field + " + " + step + " ";
+		_sql += _where(config);
+		sql  = _sql;
+		connection.query(sql,function(err,result){
+			callback && callback.apply(null,arguments);
+		});
 }
 /*
 	根据页数获取列表
@@ -520,7 +489,7 @@ Vitex.prototype.close = function(){
 }
 Vitex.mysql = mysql;
 
-
+//转移表名
 function escapeTable(table){
 	if(table){
 		table     = table.replace(/ +/,' ');
@@ -538,5 +507,54 @@ function escapeTable(table){
 		table = '';
 	}
 	return table;
+}
+//处理where条件
+function _where(config){
+		config = config || {};
+	var _sql = '';
+	//where
+	if(!_.isEmpty(config.where)){
+		_sql += " WHERE ";
+		var _w = [];
+		for(var k in config.where){
+			var op = ' = ',val = config.where[k];
+			if(/[><=!]+/.test(k)){
+				//特殊操作符的查询
+				var _k = '',_len = k.length,i,_op='';
+				for(i=0;i<_len;i++){
+					var _char = k.substr(i,1);
+					if(/[><=!]+/.test(_char)){
+						_op += _char;
+					}else{
+						_k += _char;
+					}
+				}
+				op = _op;
+				k  = _k;
+			}//end 
+			_w.push(k + op + val + "");
+		}
+		_sql += _w.join(" AND ");
+		var haswhere = true;
+	}
+	if(config.whereStr){
+		if(!haswhere){
+			_sql += " WHERE 1 ";
+		}
+		_sql += " AND " + config.whereStr;
+		haswhere = true;
+	}
+	if(!_.isEmpty(config.like)){
+		if(!haswhere){
+			_sql += " WHERE 1 ";
+		}
+		var _w = [];
+		for(var k in config.like){
+			_w.push(k+" like "+config.like[k]+"");
+		}
+		_sql += " AND " + _w.join(" AND ");
+	}
+
+	return _sql;
 }
 module.exports = Vitex;

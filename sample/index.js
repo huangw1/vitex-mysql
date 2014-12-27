@@ -25,6 +25,16 @@ v.where("name!=","setmexxx");
 v.select("n.*,x.name")
 v.join("name n","x.nid = n.id");
 */
+// According to the set step increase
+/*
+v.step('name',function(err,result){
+	console.log(err);
+	console.log(result);
+});
+v.step('name',5,function(err,result){
+	console.log(err);
+	console.log(result);
+});*/
 v.find(function(err,result){
 	console.log(result);
 });

@@ -86,6 +86,11 @@ vitex-mysql
 	@param table 表名
 	@param cond 条件
 	vitex.join("test t","t.nid = b.id");
+### step
+	@param field string 字段名
+	@param step int/function 步进值 default 1
+	@param callback function 回调
+	vitex.step('pv',1,function(err,r){})
 ### find
 	@param function 回调函数
 	查询信息
