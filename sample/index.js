@@ -20,12 +20,13 @@ v.count(function(err,num){
 });
 // >= > <= < != 
 v.where("name!=","setmexxx");
-/*
+
 //join test
 v.select("n.*,x.name")
 v.join("name n","x.nid = n.id");
-*/
+
 // According to the set step increase
+//步进
 /*
 v.step('name',function(err,result){
 	console.log(err);
@@ -34,7 +35,17 @@ v.step('name',function(err,result){
 v.step('name',5,function(err,result){
 	console.log(err);
 	console.log(result);
-});*/
+});
+v.step(['name','nid'],6,function(err,result){
+	console.log(err);
+	console.log(result);
+});
+v.step(['name','nid'],[3,4],function(err,result){
+	console.log(err);
+	console.log(result);
+});
+*/
+
 v.find(function(err,result){
 	console.log(result);
 });

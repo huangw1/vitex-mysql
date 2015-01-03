@@ -422,6 +422,7 @@ Vitex.prototype.update = function(doc,callback){
 }
 /*
 	步增
+	field /string /array
 */
 Vitex.prototype.step = function(field,step,callback){
 	if(typeof step === 'function'){
@@ -429,10 +430,26 @@ Vitex.prototype.step = function(field,step,callback){
 		step     = null;
 	}
 	step = step || 1;
-	field = connection.escapeId(field);
+	var _set = '';
+	if(_.isArray(field)){
+		var sets = [];
+		for(var i in field){
+			var	f = connection.escapeId(field[i]);
+			if(typeof step === 'number'){
+				var v = step;
+			}else{
+				var v = step ? (step[i] || 1) : 1;
+			}
+			sets.push(f + "=" + f + "+"+v);
+		}
+		_set = sets.join(" , ");
+	}else{
+		field = connection.escapeId(field);
+		_set = field + " = " +field + " + " + step;
+	}
 	var config = this._config,
 		table  = config.table ? config.table : this._dc;
-	var _sql = "update " + table + " set " + field + " = " +field + " + " + step + " ";
+	var _sql = "update " + table + " set " + _set + " ";
 		_sql += _where(config);
 		sql  = _sql;
 		connection.query(sql,function(err,result){
