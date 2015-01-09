@@ -1,7 +1,7 @@
 vitex-mysql
 ===========
 
-这是一个对node-mysql的封装，可以让您更简单的更快捷的开发程序。
+这是一个对node-mysql的封装，可以让您更简单的更快捷的开发程序,与vitex有着类似的API。
 
 # INSTALL
 	
