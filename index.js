@@ -1,3 +1,7 @@
+/*
+	Author: skipify@qq.com
+	Verison : 0.1.3
+*/
 var mysql = require('mysql'),
 	_     = require('lodash');
 
